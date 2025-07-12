@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clody</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <img src="logo.svg" alt="Clody Logo" class="clody-logo" />
+      <form id="diary-form">
+        <textarea
+          id="diary-input"
+          maxlength="200"
+          placeholder="Write one thing you're gratefulfor today — Clody will write back!"
+          required
+        ></textarea>
+        <div class="form-footer">
+          <span id="char-count">0/200</span>
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+      <div id="result" class="result">
+        <!-- 챗지피티 답변이 여기에 표시됩니다 -->
+      </div>
+    </div>
+    <script type="module" src="main.js"></script>
+    <footer style="margin-top: 48px; text-align: center;">
+      <a href="https://carewithclody.oopy.io/" target="_blank" class="early-access-btn">Get early access</a>
+    </footer>
+  </body>
+</html>
