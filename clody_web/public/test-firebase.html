@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase 연결 테스트</title>
+    <title>Firebase Connection Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,34 +67,34 @@
 </head>
 <body>
     <div class="container">
-        <h1>🍀 Firebase 연결 테스트</h1>
+        <h1>🍀 Firebase Connection Test</h1>
         
         <div id="connection-status" class="status info">
-            Firebase 연결 상태를 확인하는 중...
+            Checking Firebase connection status...
         </div>
 
         <div class="test-section">
-            <h3>1. 연결 테스트</h3>
-            <button onclick="testConnection()">연결 확인</button>
+                    <h3>1. Connection Test</h3>
+        <button onclick="testConnection()">Check Connection</button>
             <div id="connection-result"></div>
         </div>
 
         <div class="test-section">
-            <h3>2. 데이터 쓰기 테스트</h3>
-            <input type="text" id="test-text" placeholder="테스트할 텍스트를 입력하세요" value="Firebase 연결 테스트 - 성공!">
-            <button onclick="testWrite()">데이터 쓰기</button>
+                    <h3>2. Data Write Test</h3>
+        <input type="text" id="test-text" placeholder="Enter text to test" value="Firebase connection test - Success!">
+        <button onclick="testWrite()">Write Data</button>
             <div id="write-result"></div>
         </div>
 
         <div class="test-section">
-            <h3>3. 데이터 읽기 테스트</h3>
-            <button onclick="testRead()">최근 데이터 읽기</button>
+                    <h3>3. Data Read Test</h3>
+        <button onclick="testRead()">Read Recent Data</button>
             <div id="read-result"></div>
         </div>
 
         <div class="test-section">
-            <h3>4. 관리 페이지로 이동</h3>
-            <button onclick="window.open('admin.html', '_blank')">관리 페이지 열기</button>
+                    <h3>4. Go to Admin Page</h3>
+        <button onclick="window.open('super-secret-dashboard-9482.html', '_blank')">Open Admin Page</button>
         </div>
     </div>
 
@@ -113,7 +113,7 @@
         // 전역 함수로 등록
         window.testConnection = async function() {
             const resultDiv = document.getElementById('connection-result');
-            resultDiv.innerHTML = '<div class="status info">연결 테스트 중...</div>';
+            resultDiv.innerHTML = '<div class="status info">Testing connection...</div>';
 
             try {
                 // 간단한 쿼리로 연결 테스트
@@ -123,12 +123,12 @@
                     limit(1)
                 ));
                 
-                resultDiv.innerHTML = '<div class="status success">✅ Firebase 연결 성공! Firestore에 정상적으로 접근할 수 있습니다.</div>';
-                document.getElementById('connection-status').innerHTML = '<div class="status success">✅ Firebase 연결됨</div>';
+                            resultDiv.innerHTML = '<div class="status success">✅ Firebase connection successful! Firestore is accessible.</div>';
+            document.getElementById('connection-status').innerHTML = '<div class="status success">✅ Firebase Connected</div>';
                 
             } catch (error) {
-                resultDiv.innerHTML = `<div class="status error">❌ Firebase 연결 실패: ${error.message}</div>`;
-                document.getElementById('connection-status').innerHTML = '<div class="status error">❌ Firebase 연결 실패</div>';
+                            resultDiv.innerHTML = `<div class="status error">❌ Firebase connection failed: ${error.message}</div>`;
+            document.getElementById('connection-status').innerHTML = '<div class="status error">❌ Firebase Connection Failed</div>';
             }
         };
 
@@ -137,30 +137,30 @@
             const resultDiv = document.getElementById('write-result');
             
             if (!testText.trim()) {
-                resultDiv.innerHTML = '<div class="status error">텍스트를 입력해주세요.</div>';
+                resultDiv.innerHTML = '<div class="status error">Please enter text.</div>';
                 return;
             }
 
-            resultDiv.innerHTML = '<div class="status info">데이터 쓰기 중...</div>';
+            resultDiv.innerHTML = '<div class="status info">Writing data...</div>';
 
             try {
                 const docRef = await addDoc(collection(db, "diaries"), {
                     diary: testText,
-                    reply: "테스트 응답입니다.",
+                    reply: "This is a test response.",
                     createdAt: serverTimestamp(),
                     isTest: true
                 });
                 
-                resultDiv.innerHTML = `<div class="status success">✅ 데이터 쓰기 성공! 문서 ID: ${docRef.id}</div>`;
+                resultDiv.innerHTML = `<div class="status success">✅ Data write successful! Document ID: ${docRef.id}</div>`;
                 
             } catch (error) {
-                resultDiv.innerHTML = `<div class="status error">❌ 데이터 쓰기 실패: ${error.message}</div>`;
+                resultDiv.innerHTML = `<div class="status error">❌ Data write failed: ${error.message}</div>`;
             }
         };
 
         window.testRead = async function() {
             const resultDiv = document.getElementById('read-result');
-            resultDiv.innerHTML = '<div class="status info">데이터 읽기 중...</div>';
+            resultDiv.innerHTML = '<div class="status info">Reading data...</div>';
 
             try {
                 const querySnapshot = await getDocs(query(
@@ -169,20 +169,20 @@
                     limit(5)
                 ));
 
-                let html = '<div class="status success">✅ 최근 5개 데이터:</div>';
+                let html = '<div class="status success">✅ Recent 5 data entries:</div>';
                 
                 if (querySnapshot.empty) {
-                    html += '<div class="status info">저장된 데이터가 없습니다.</div>';
+                    html += '<div class="status info">No saved data found.</div>';
                 } else {
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
                         const date = data.createdAt?.toDate() || new Date();
                         html += `
                             <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                                <strong>일기:</strong> ${data.diary}<br>
-                                <strong>응답:</strong> ${data.reply}<br>
-                                <strong>작성일:</strong> ${date.toLocaleString('ko-KR')}<br>
-                                <strong>문서 ID:</strong> ${doc.id}
+                                                        <strong>Diary:</strong> ${data.diary}<br>
+                        <strong>Reply:</strong> ${data.reply}<br>
+                        <strong>Created:</strong> ${date.toLocaleString('en-US')}<br>
+                        <strong>Document ID:</strong> ${doc.id}
                             </div>
                         `;
                     });
@@ -191,7 +191,7 @@
                 resultDiv.innerHTML = html;
                 
             } catch (error) {
-                resultDiv.innerHTML = `<div class="status error">❌ 데이터 읽기 실패: ${error.message}</div>`;
+                resultDiv.innerHTML = `<div class="status error">❌ Data read failed: ${error.message}</div>`;
             }
         };
 
