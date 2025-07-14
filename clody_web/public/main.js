@@ -16,7 +16,6 @@ diaryInput.addEventListener("input", () => {
 // 페이지 로드 시 사용자 IP 가져오기
 (async () => {
   userIP = await getUserIP();
-  console.log("User IP:", userIP);
 
   if (!isValidIP(userIP)) {
     displayError("Invalid IP address.");
@@ -57,7 +56,6 @@ form.addEventListener("submit", async (e) => {
     charCountSpan.textContent = "0/200";
 
   } catch (error) {
-    console.error("Submission error:", error);
     displayError("Oops! Something went wrong. Try again later.");
   }
 });
