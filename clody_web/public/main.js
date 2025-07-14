@@ -1,153 +1,81 @@
-import { db } from "./firebase-config.js";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { OPENAI_API_KEY, PROMPT } from "./secret.js";
-import { getUserIP } from "./ip-service.js";
+import { getUserIP, isValidIP } from "./ip-service.js";
 import { checkAndIncrementIPLimit } from "./ip-limit-service.js";
 
-const diaryInput = document.getElementById("diary-input");
-const charCount = document.getElementById("char-count");
 const form = document.getElementById("diary-form");
+const diaryInput = document.getElementById("diary-input");
 const resultDiv = document.getElementById("result");
+const charCountSpan = document.getElementById("char-count");
 
-const DEFAULT_RESULT_COLOR = "#333";
-const ERROR_RESULT_COLOR = "#e74c3c";
+let userIP = null;
 
+// 글자 수 표시
 diaryInput.addEventListener("input", () => {
-  charCount.textContent = `${diaryInput.value.length}/200`;
+  charCountSpan.textContent = `${diaryInput.value.length}/200`;
 });
 
-function showSpinner() {
-  resultDiv.style.color = DEFAULT_RESULT_COLOR;
-  resultDiv.innerHTML = '<div class="spinner"></div>';
-}
-function hideSpinner() {
-  resultDiv.innerHTML = '<span class="result-placeholder" style="margin-bottom: 0;">Lody will reply here in a moment!</span>';
-}
+// 페이지 로드 시 사용자 IP 가져오기
+(async () => {
+  userIP = await getUserIP();
+  console.log("User IP:", userIP);
 
-function showError(message) {
-  hideSpinner();
-  resultDiv.style.color = ERROR_RESULT_COLOR;
-  resultDiv.innerHTML = `<span style="color: ${ERROR_RESULT_COLOR};">${message}</span>`;
-}
-
-async function getChatGPTReply(diaryText) {
-  
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: PROMPT,
-        },
-        { role: "user", content: diaryText },
-      ],
-      max_tokens: 200,
-    }),
-  });
-  if (!response.ok) {
-    const errorText = await response.text();
-    
-          throw new Error(`Lody couldn't write a reply due to an error! Please try again.`);
+  if (!isValidIP(userIP)) {
+    displayError("Invalid IP address.");
+    form.querySelector("button").disabled = true;
   }
-  const data = await response.json();
-  
-  return data.choices[0].message.content.trim();
-}
+})();
 
+// 폼 제출 이벤트 핸들러
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const text = diaryInput.value.trim();
-  if (text.length === 0) {
-    alert("Please write something you're grateful for!");
-    return;
-  }
 
-  showSpinner();
+  const diary = diaryInput.value.trim();
+  if (!diary) return;
+
+  displayLoading("Analyzing your diary...");
 
   try {
-    // 1. 사용자 IP 가져오기
-    const userIP = await getUserIP();
+    const limitStatus = await checkAndIncrementIPLimit(userIP);
 
-    // 2. IP 제한 확인
-    const limitCheck = await checkAndIncrementIPLimit(userIP);
-
-    if (!limitCheck.allowed) {
-      // 제한 초과 시 에러 표시
-                      showError(limitCheck.message || "You've reached today's diary limit. Come back tomorrow!");
+    if (!limitStatus.allowed) {
+      displayError(limitStatus.message || "Daily limit exceeded.");
       return;
     }
 
-    // 3. ChatGPT 응답 받기
-    const reply = await getChatGPTReply(text);
-
-    // 4. Firestore에 일기 저장 (IP 정보 포함)
-    await addDoc(collection(db, "diaries"), {
-      diary: text,
-      reply,
-      userIP: userIP, // IP 정보 추가
-      createdAt: serverTimestamp(),
+    const response = await fetch("/submitDiary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ diary }),
     });
 
+    if (!response.ok) {
+      throw new Error("Failed to submit diary");
+    }
 
-    // 5. 결과 표시
-    hideSpinner();
-    resultDiv.style.color = DEFAULT_RESULT_COLOR;
-    resultDiv.innerHTML = reply;
-    
-    // 6. 입력창 초기화
+    const data = await response.json();
+    displayResult(data.reply);
     diaryInput.value = "";
-    charCount.textContent = "0/200";
+    charCountSpan.textContent = "0/200";
 
-    // 7. IP 제한 정보 표시 (선택적)
-
-  } catch (err) {
-
-    showError(`${err.message}`);
+  } catch (error) {
+    console.error("Submission error:", error);
+    displayError("Oops! Something went wrong. Try again later.");
   }
 });
 
-// 개발자 도구 감지 및 보안 강화
-(function() {
-  let devtools = {open: false, orientation: null};
-  const threshold = 160;
-  
-  setInterval(function() {
-    if (window.outerHeight - window.innerHeight > threshold || 
-        window.outerWidth - window.innerWidth > threshold) {
-      if (!devtools.open) {
-        devtools.open = true;
-        // 개발자 도구가 열리면 페이지 새로고침
-        window.location.reload();
-      }
-    } else {
-      devtools.open = false;
-    }
-  }, 500);
-  
-  // 우클릭 방지
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    return false;
-  });
-  
-  // 키보드 단축키 방지
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || 
-        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-        (e.ctrlKey && e.key === 'U')) {
-      e.preventDefault();
-      return false;
-    }
-  });
-})();
+// 결과 표시
+function displayResult(text) {
+  resultDiv.innerHTML = `<p class="result-text">${text}</p>`;
+  resultDiv.classList.remove("result-flex-start");
+}
+
+// 에러 표시
+function displayError(message) {
+  resultDiv.innerHTML = `<p class="result-error">${message}</p>`;
+  resultDiv.classList.remove("result-flex-start");
+}
+
+// 로딩 표시
+function displayLoading(message) {
+  resultDiv.innerHTML = `<p class="result-loading">${message}</p>`;
+  resultDiv.classList.remove("result-flex-start");
+}
