@@ -77,3 +77,18 @@ function displayLoading(message) {
   resultDiv.innerHTML = `<p class="result-loading">${message}</p>`;
   resultDiv.classList.remove("result-flex-start");
 }
+
+document.addEventListener("keydown", function (e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && e.key === "I") ||
+    (e.ctrlKey && e.key === "u")
+  ) {
+    e.preventDefault();
+    alert("Access to developer tools is restricted.");
+  }
+});
+
+document.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
