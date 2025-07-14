@@ -9,25 +9,24 @@
   <body>
     <div class="container">
       <img src="logo.svg" alt="Clody Logo" class="clody-logo" />
+      <a href="https://carewithclody.oopy.io/" target="_blank" class="early-access-btn">Get Early Access (50 only)</a>
       <form id="diary-form">
         <textarea
           id="diary-input"
           maxlength="200"
-          placeholder="Write one thing you're gratefulfor today — Clody will write back!"
+          placeholder="Write one thing you're grateful for today"
           required
         ></textarea>
         <div class="form-footer">
           <span id="char-count">0/200</span>
-          <button type="submit">Submit</button>
+          <button type="submit" class="send-btn">Send</button>
         </div>
       </form>
-      <div id="result" class="result">
-        <!-- 챗지피티 답변이 여기에 표시됩니다 -->
+      <div id="result" class="result" style="flex-direction: column; align-items: flex-start;">
+        <span class="result-placeholder" style="margin-bottom: 0;">Lody will reply here in a moment!</span>
       </div>
     </div>
     <script type="module" src="main.js"></script>
-    <footer style="margin-top: 48px; text-align: center;">
-      <a href="https://carewithclody.oopy.io/" target="_blank" class="early-access-btn">Get early access</a>
-    </footer>
+    <!-- footer에서 버튼 삭제 -->
   </body>
 </html>

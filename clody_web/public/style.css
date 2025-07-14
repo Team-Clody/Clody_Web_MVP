@@ -1,5 +1,5 @@
 body {
-  background: #f7f7f8;
+  background: #fff7d6;
   font-family: "Segoe UI", "Apple SD Gothic Neo", Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -7,13 +7,14 @@ body {
 .container {
   max-width: 480px;
   margin: 60px auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
-  padding: 40px 32px 32px 32px;
+  background: #fffbe6;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(255, 216, 77, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+  padding: 48px 32px 36px 32px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  border: 1px solid #ffe07a;
 }
 .title {
   font-size: 2.5rem;
@@ -37,18 +38,20 @@ body {
 #diary-input {
   min-height: 100px;
   resize: vertical;
-  border: 1.5px solid #e3e3e6;
-  border-radius: 8px;
-  padding: 14px;
+  border: 1.5px solid #e6e1c3;
+  border-radius: 10px;
+  padding: 16px;
   font-size: 1rem;
-  background: #fafafb;
+  background: #fafbfc;
   color: #222;
   outline: none;
-  transition: border 0.2s;
+  transition: border 0.2s, background 0.2s;
+  box-shadow: 0 1px 4px rgba(255, 216, 77, 0.07);
+  font-family: Arial, Helvetica, sans-serif;
 }
 #diary-input:focus {
   border: 1.5px solid #ffd84d;
-  background: #fff;
+  background: #fffbe6;
 }
 .form-footer {
   display: flex;
@@ -59,33 +62,45 @@ body {
   font-size: 0.95rem;
   color: #b0b0b5;
 }
-button[type="submit"] {
-  background: #ffd84d;
+button[type="submit"], .send-btn {
+  background: linear-gradient(90deg, #ffe07a 0%, #ffd84d 100%);
   color: #333;
   border: none;
-  border-radius: 6px;
-  padding: 8px 20px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 1.08rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(255, 216, 77, 0.10);
 }
-button[type="submit"]:hover {
-  background: #e5c43c;
+button[type="submit"]:hover, .send-btn:hover {
+  background: linear-gradient(90deg, #ffd84d 0%, #ffe07a 100%);
 }
 /* 결과창 공통 스타일은 유지 */
 .result {
-  margin-top: 32px;
-  background: #f4f4fa;
-  border-radius: 8px;
+  margin-top: 24px;
+  background: #fafbfc;
+  border-radius: 10px;
   padding: 18px 16px;
   min-height: 60px;
   color: #333;
-  font-size: 1.05rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  font-size: 1.08rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   white-space: pre-line;
   display: flex;
   align-items: center;
+  border: 1.5px solid #e6e1c3;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.result-placeholder {
+  color: #a6a6a6;
+  font-size: 1.08rem;
+  font-weight: 400;
+  opacity: 1;
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: normal;
 }
 
 /* 로딩 애니메이션 점점점 */
@@ -136,26 +151,47 @@ button[type="submit"]:hover {
 
 .early-access-btn {
   display: inline-block;
-  background: #f0f0f3;
-  color: #888;
-  font-size: 1rem;
-  padding: 10px 28px;
-  border-radius: 24px;
+  background: #ffe07a;
+  color: #a68c2d;
+  font-size: 0.97rem;
+  padding: 8px 20px;
+  border-radius: 16px;
   text-decoration: none;
-  font-weight: 500;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  font-weight: 600;
+  box-shadow: 0 1.5px 6px rgba(255,216,77,0.10);
   transition: background 0.2s, color 0.2s;
-  margin-top: 12px;
+  margin: 0 auto 24px auto;
+  border: 1.5px solid #ffe07a;
+  text-align: center;
 }
 .early-access-btn:hover {
-  background: #e0e0e6;
-  color: #555;
+  background: #ffd84d;
+  color: #a68c2d;
 }
 
 .clody-logo {
   display: block;
-  margin: 0 auto 18px auto;
+  margin: 0 auto 20px auto; /* 이미지와 버튼 사이 간격을 20px로 줄임 */
   max-width: 240px;
   width: 100%;
   height: auto;
+}
+
+#diary-input,
+input[type="text"],
+input[type="email"],
+textarea {
+  border: 1.5px solid #e6e1c3 !important;
+  background: #fafbfc !important;
+}
+
+#diary-input::placeholder,
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+  color: #a6a6a6;
+  font-size: 1.08rem;
+  font-weight: 400;
+  opacity: 1;
+  font-family: Arial, Helvetica, sans-serif;
 }
