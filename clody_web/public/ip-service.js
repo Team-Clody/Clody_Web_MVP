@@ -9,7 +9,7 @@ export async function getUserIP() {
     const data = await response.json();
     return data.ip;
   } catch (error) {
-    console.error('IP 조회 오류:', error);
+    
     
     // 백업 API 시도
     try {
@@ -20,7 +20,7 @@ export async function getUserIP() {
       const backupData = await backupResponse.json();
       return backupData.origin.split(',')[0].trim(); // 첫 번째 IP만 사용
     } catch (backupError) {
-      console.error('백업 IP 조회 오류:', backupError);
+
       
       // 최후의 수단: 로컬 개발용 기본값
       return '127.0.0.1';

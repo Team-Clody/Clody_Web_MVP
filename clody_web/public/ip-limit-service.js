@@ -89,7 +89,7 @@ export async function checkAndIncrementIPLimit(userIP) {
     };
     
   } catch (error) {
-    console.error('IP 제한 확인 오류:', error);
+
     // 오류 시 허용 (서비스 장애 시 사용자 차단 방지)
     return { allowed: true, count: 0, limit: DAILY_LIMIT, error: true };
   }
@@ -105,7 +105,7 @@ export async function whitelistIP(userIP) {
     });
     return { success: true };
   } catch (error) {
-    console.error('IP 화이트리스트 오류:', error);
+
     return { success: false, error: error.message };
   }
 }
@@ -120,7 +120,7 @@ export async function removeWhitelistIP(userIP) {
     });
     return { success: true };
   } catch (error) {
-    console.error('IP 화이트리스트 해제 오류:', error);
+
     return { success: false, error: error.message };
   }
 }
@@ -131,9 +131,7 @@ export async function getTodayLimitedIPs() {
     const today = getTodayString();
     const q = query(
       collection(db, "ip_limits"),
-      where("date", "==", today),
-      where("count", ">=", DAILY_LIMIT),
-      orderBy("count", "desc")
+      where("date", "==", today)
     );
     
     const querySnapshot = await getDocs(q);
@@ -141,17 +139,23 @@ export async function getTodayLimitedIPs() {
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      limitedIPs.push({
-        ip: doc.id,
-        count: data.count,
-        whitelist: data.whitelist || false,
-        lastCalled: data.lastCalled?.toDate() || null
-      });
+      // 제한에 걸린 IP만 필터링
+      if (data.count >= DAILY_LIMIT) {
+        limitedIPs.push({
+          ip: doc.id,
+          count: data.count,
+          whitelist: data.whitelist || false,
+          lastCalled: data.lastCalled?.toDate() || null
+        });
+      }
     });
+    
+    // 클라이언트에서 정렬
+    limitedIPs.sort((a, b) => b.count - a.count);
     
     return limitedIPs;
   } catch (error) {
-    console.error('제한된 IP 목록 조회 오류:', error);
+
     return [];
   }
 }
@@ -181,7 +185,120 @@ export async function getDiariesByIP(userIP) {
     
     return diaries;
   } catch (error) {
-    console.error('IP별 일기 조회 오류:', error);
+
+    return [];
+  }
+}
+
+// 활발한 사용자 분석 (IP별 총 일기 수 및 활동 패턴)
+export async function getActiveUserAnalytics() {
+  try {
+    // 모든 일기 데이터 가져오기 (간단한 쿼리로 변경)
+    const q = query(
+      collection(db, "diaries"),
+      orderBy("createdAt", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const userStats = {};
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const userIP = data.userIP;
+      
+      // userIP가 없는 경우 건너뛰기
+      if (!userIP) return;
+      
+      if (!userStats[userIP]) {
+        userStats[userIP] = {
+          ip: userIP,
+          totalDiaries: 0,
+          firstDiary: null,
+          lastDiary: null,
+          diaries: []
+        };
+      }
+      
+      userStats[userIP].totalDiaries++;
+      userStats[userIP].diaries.push({
+        id: doc.id,
+        diary: data.diary,
+        reply: data.reply,
+        createdAt: data.createdAt?.toDate() || null
+      });
+      
+      // 첫 번째와 마지막 일기 날짜 추적
+      const createdAt = data.createdAt?.toDate();
+      if (createdAt) {
+        if (!userStats[userIP].firstDiary || createdAt < userStats[userIP].firstDiary) {
+          userStats[userIP].firstDiary = createdAt;
+        }
+        if (!userStats[userIP].lastDiary || createdAt > userStats[userIP].lastDiary) {
+          userStats[userIP].lastDiary = createdAt;
+        }
+      }
+    });
+    
+    // 배열로 변환하고 총 일기 수로 정렬
+    const activeUsers = Object.values(userStats)
+      .filter(user => user.totalDiaries >= 2) // 2개 이상 작성한 사용자만
+      .sort((a, b) => b.totalDiaries - a.totalDiaries);
+    
+    // 디버깅을 위한 로그 (개발 중에만 사용)
+    console.log("총 사용자 수:", Object.keys(userStats).length);
+    console.log("활발한 사용자 수:", activeUsers.length);
+    console.log("활발한 사용자 목록:", activeUsers);
+    
+    return activeUsers;
+  } catch (error) {
+    return [];
+  }
+}
+
+// 특정 기간 내 활발한 사용자 분석
+export async function getActiveUsersByPeriod(days = 7) {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    const q = query(
+      collection(db, "diaries"),
+      where("userIP", "!=", null),
+      where("createdAt", ">=", cutoffDate),
+      orderBy("userIP"),
+      orderBy("createdAt", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const userStats = {};
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const userIP = data.userIP;
+      
+      if (!userStats[userIP]) {
+        userStats[userIP] = {
+          ip: userIP,
+          recentDiaries: 0,
+          lastActive: null,
+          consecutiveDays: 0
+        };
+      }
+      
+      userStats[userIP].recentDiaries++;
+      const createdAt = data.createdAt?.toDate();
+      if (createdAt && (!userStats[userIP].lastActive || createdAt > userStats[userIP].lastActive)) {
+        userStats[userIP].lastActive = createdAt;
+      }
+    });
+    
+    // 배열로 변환하고 최근 활동량으로 정렬
+    const recentActiveUsers = Object.values(userStats)
+      .filter(user => user.recentDiaries > 1)
+      .sort((a, b) => b.recentDiaries - a.recentDiaries);
+    
+    return recentActiveUsers;
+  } catch (error) {
     return [];
   }
 } 

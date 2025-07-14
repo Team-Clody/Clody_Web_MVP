@@ -35,7 +35,7 @@ function showError(message) {
 }
 
 async function getChatGPTReply(diaryText) {
-  console.log("[GPT] 서버에 요청 시작");
+  
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -56,11 +56,11 @@ async function getChatGPTReply(diaryText) {
   });
   if (!response.ok) {
     const errorText = await response.text();
-    console.log("[GPT] 서버 응답 실패:", errorText);
+    
           throw new Error(`Lody couldn't write a reply due to an error! Please try again.`);
   }
   const data = await response.json();
-  console.log("[GPT] 서버 응답 성공:", data);
+  
   return data.choices[0].message.content.trim();
 }
 
@@ -76,14 +76,10 @@ form.addEventListener("submit", async (e) => {
 
   try {
     // 1. 사용자 IP 가져오기
-    console.log("[IP] IP 주소 조회 시작");
     const userIP = await getUserIP();
-    console.log("[IP] 사용자 IP:", userIP);
 
     // 2. IP 제한 확인
-    console.log("[IP] IP 제한 확인 시작");
     const limitCheck = await checkAndIncrementIPLimit(userIP);
-    console.log("[IP] 제한 확인 결과:", limitCheck);
 
     if (!limitCheck.allowed) {
       // 제한 초과 시 에러 표시
@@ -92,19 +88,16 @@ form.addEventListener("submit", async (e) => {
     }
 
     // 3. ChatGPT 응답 받기
-    console.log("[GPT] ChatGPT 응답 요청 시작");
     const reply = await getChatGPTReply(text);
-    console.log("[GPT] ChatGPT 응답 완료");
 
     // 4. Firestore에 일기 저장 (IP 정보 포함)
-    console.log("[DB] Firestore에 일기 저장 시작");
     await addDoc(collection(db, "diaries"), {
       diary: text,
       reply,
       userIP: userIP, // IP 정보 추가
       createdAt: serverTimestamp(),
     });
-    console.log("[DB] Firestore 저장 완료");
+
 
     // 5. 결과 표시
     hideSpinner();
@@ -116,12 +109,45 @@ form.addEventListener("submit", async (e) => {
     charCount.textContent = "0/200";
 
     // 7. IP 제한 정보 표시 (선택적)
-    if (limitCheck.count && limitCheck.limit) {
-      console.log(`[IP] 오늘 사용량: ${limitCheck.count}/${limitCheck.limit}`);
-    }
 
   } catch (err) {
-    console.error("[ERROR] 전체 프로세스 오류:", err);
+
     showError(`${err.message}`);
   }
 });
+
+// 개발자 도구 감지 및 보안 강화
+(function() {
+  let devtools = {open: false, orientation: null};
+  const threshold = 160;
+  
+  setInterval(function() {
+    if (window.outerHeight - window.innerHeight > threshold || 
+        window.outerWidth - window.innerWidth > threshold) {
+      if (!devtools.open) {
+        devtools.open = true;
+        // 개발자 도구가 열리면 페이지 새로고침
+        window.location.reload();
+      }
+    } else {
+      devtools.open = false;
+    }
+  }, 500);
+  
+  // 우클릭 방지
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+  });
+  
+  // 키보드 단축키 방지
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.ctrlKey && e.key === 'U')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+})();
