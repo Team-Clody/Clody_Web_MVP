@@ -12,6 +12,7 @@ const diaryInput = document.getElementById("diary-input");
 const charCount = document.getElementById("char-count");
 const form = document.getElementById("diary-form");
 const resultDiv = document.getElementById("result");
+const retryBtn = document.getElementById("retry-btn");
 
 const DEFAULT_RESULT_COLOR = "#333";
 const ERROR_RESULT_COLOR = "#e74c3c";
@@ -20,38 +21,54 @@ diaryInput.addEventListener("input", () => {
   charCount.textContent = `${diaryInput.value.length}/200`;
 });
 
-// 모바일 키보드 포커스 문제 해결
-diaryInput.addEventListener("blur", (e) => {
-  // blur 이벤트가 발생해도 포커스를 유지할 수 있도록 짧은 지연 후 다시 포커스
-  setTimeout(() => {
-    if (document.activeElement !== diaryInput && diaryInput.value.length > 0) {
-      // 사용자가 다른 곳을 클릭한 게 아니라면 포커스 유지
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0) {
-        diaryInput.focus();
-      }
-    }
-  }, 100);
-});
-
-// 텍스트 영역 클릭 시 확실한 포커스 보장
-diaryInput.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  diaryInput.focus();
+// 재시도 버튼 클릭 이벤트
+retryBtn.addEventListener("click", () => {
+  // 입력창 초기화
+  diaryInput.value = "";
+  charCount.textContent = "0/200";
   
-  // 커서를 텍스트 끝으로 이동
-  setTimeout(() => {
-    const length = diaryInput.value.length;
-    diaryInput.setSelectionRange(length, length);
-  }, 10);
+  // 결과창 초기화
+  resultDiv.style.color = DEFAULT_RESULT_COLOR;
+  resultDiv.innerHTML = '<span class="result-placeholder" style="margin-bottom: 0;">Lody will reply here in a moment!</span>';
+  
+  // 입력창에 포커스
+  diaryInput.focus();
 });
 
-// iOS Safari에서 키보드가 사라지는 문제 해결
+// iOS Safari 키보드 문제 해결 - 더 안전한 방법
+let isUserInteracting = false;
+let touchStartTime = 0;
+
+diaryInput.addEventListener("touchstart", (e) => {
+  isUserInteracting = true;
+  touchStartTime = Date.now();
+});
+
+diaryInput.addEventListener("touchend", (e) => {
+  const touchDuration = Date.now() - touchStartTime;
+  
+  // 짧은 터치 (탭)인 경우 커서 이동 허용
+  if (touchDuration < 500) {
+    setTimeout(() => {
+      isUserInteracting = false;
+    }, 100);
+  } else {
+    // 긴 터치 (텍스트 선택)인 경우 더 오래 대기
+    setTimeout(() => {
+      isUserInteracting = false;
+    }, 300);
+  }
+});
+
+// iOS Safari에서는 브라우저가 커서 위치를 올바르게 처리하므로 별도 처리 불필요
+
+// 포커스 시 스크롤 조정 (iOS Safari 전용)
 diaryInput.addEventListener("focus", () => {
-  // 스크롤을 텍스트 영역으로 이동
-  setTimeout(() => {
-    diaryInput.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 300);
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    setTimeout(() => {
+      window.scrollTo(0, diaryInput.offsetTop - 100);
+    }, 300);
+  }
 });
 
 function showSpinner() {
@@ -138,9 +155,7 @@ form.addEventListener("submit", async (e) => {
     resultDiv.style.color = DEFAULT_RESULT_COLOR;
     resultDiv.innerHTML = reply;
     
-    // 6. 입력창 초기화
-    diaryInput.value = "";
-    charCount.textContent = "0/200";
+    // 6. 입력창은 초기화하지 않음 (일기 내용 유지)
 
     // 7. IP 제한 정보 표시 (선택적)
 
@@ -153,11 +168,31 @@ form.addEventListener("submit", async (e) => {
 // 개발자 도구 감지 및 보안 강화
 (function() {
   let devtools = {open: false, orientation: null};
-  const threshold = 160;
+  let isInitialized = false;
+  let initialOuterHeight = 0;
+  let initialOuterWidth = 0;
+  
+  // 초기 크기 설정 (페이지 로드 후 1초 대기)
+  setTimeout(() => {
+    initialOuterHeight = window.outerHeight;
+    initialOuterWidth = window.outerWidth;
+    isInitialized = true;
+  }, 1000);
   
   setInterval(function() {
-    if (window.outerHeight - window.innerHeight > threshold || 
-        window.outerWidth - window.innerWidth > threshold) {
+    if (!isInitialized) return;
+    
+    // 모바일 환경에서는 개발자 도구 감지 비활성화
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      return;
+    }
+    
+    const heightDiff = window.outerHeight - window.innerHeight;
+    const widthDiff = window.outerWidth - window.innerWidth;
+    
+    // 더 엄격한 조건으로 감지 (데스크톱에서만)
+    if ((heightDiff > 200 && heightDiff > initialOuterHeight * 0.3) || 
+        (widthDiff > 200 && widthDiff > initialOuterWidth * 0.3)) {
       if (!devtools.open) {
         devtools.open = true;
         // 개발자 도구가 열리면 페이지 새로고침
@@ -166,7 +201,7 @@ form.addEventListener("submit", async (e) => {
     } else {
       devtools.open = false;
     }
-  }, 500);
+  }, 1000);
   
   // 우클릭 방지
   document.addEventListener('contextmenu', function(e) {

@@ -41,7 +41,15 @@
         ></textarea>
         <div class="form-footer">
           <span id="char-count">0/200</span>
-          <button type="submit" class="send-btn">Send</button>
+          <div class="button-group">
+            <button type="button" class="retry-btn" id="retry-btn" title="다시 시도">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 4v6h6"></path>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+            </button>
+            <button type="submit" class="send-btn">Send</button>
+          </div>
         </div>
       </form>
       <div id="result" class="result" style="flex-direction: column; align-items: flex-start;">
