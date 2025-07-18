@@ -1,0 +1,242 @@
+body {
+  background: #fff7d6;
+  font-family: "Segoe UI", "Apple SD Gothic Neo", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 480px;
+  margin: 60px auto;
+  background: #fffbe6;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(255, 216, 77, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 48px 32px 36px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid #ffe07a;
+}
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+  color: #2e2e2f;
+  text-align: center;
+}
+.caption {
+  font-size: 1.1rem;
+  color: #6c6c6f;
+  margin-bottom: 24px;
+  text-align: center;
+}
+#diary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#diary-input {
+  min-height: 100px;
+  resize: vertical;
+  border: 1.5px solid #e6e1c3;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 1rem;
+  background: #fafbfc;
+  color: #222;
+  outline: none;
+  transition: border 0.2s, background 0.2s;
+  box-shadow: 0 1px 4px rgba(255, 216, 77, 0.07);
+  font-family: Arial, Helvetica, sans-serif;
+  /* iOS Safari 키보드 안정성 개선 */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-touch-callout: default;
+  /* 텍스트 선택 및 커서 이동 개선 */
+  -webkit-text-size-adjust: 100%;
+  -webkit-appearance: none;
+  cursor: text;
+}
+#diary-input:focus {
+  border: 1.5px solid #ffd84d;
+  background: #fffbe6;
+  /* 포커스 시 확실한 상태 유지 */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  /* 텍스트 선택 시각적 개선 */
+  outline: none;
+}
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#char-count {
+  font-size: 0.95rem;
+  color: #b0b0b5;
+}
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.retry-btn {
+  background: #f8f9fa;
+  border: 1px solid #e6e1c3;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+.retry-btn:hover {
+  background: #e9ecef;
+  border-color: #d0d0d0;
+  color: #333;
+}
+.retry-btn:active {
+  transform: scale(0.95);
+}
+button[type="submit"],
+.send-btn {
+  background: linear-gradient(90deg, #ffe07a 0%, #ffd84d 100%);
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(255, 216, 77, 0.1);
+}
+button[type="submit"]:hover,
+.send-btn:hover {
+  background: linear-gradient(90deg, #ffd84d 0%, #ffe07a 100%);
+}
+/* 결과창 공통 스타일은 유지 */
+.result {
+  margin-top: 24px;
+  background: #fafbfc;
+  border-radius: 10px;
+  padding: 18px 16px;
+  min-height: 60px;
+  color: #333;
+  font-size: 1.08rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  white-space: pre-line;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e6e1c3;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.result-placeholder {
+  color: #a6a6a6;
+  font-size: 1.08rem;
+  font-weight: 400;
+  opacity: 1;
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: normal;
+}
+
+/* 로딩 애니메이션 점점점 */
+.loading::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  text-align: left;
+  animation: dots 1s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+  100% {
+    content: "";
+  }
+}
+
+.spinner {
+  display: block;
+  margin: 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 4px solid #fceba0;
+  border-top: 4px solid #ffd84d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.early-access-btn {
+  display: inline-block;
+  background: #ffe07a;
+  color: #a68c2d;
+  font-size: 0.97rem;
+  padding: 8px 20px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 1.5px 6px rgba(255, 216, 77, 0.1);
+  transition: background 0.2s, color 0.2s;
+  margin: 0 auto 24px auto;
+  border: 1.5px solid #ffe07a;
+  text-align: center;
+}
+.early-access-btn:hover {
+  background: #ffd84d;
+  color: #a68c2d;
+}
+
+.clody-logo {
+  display: block;
+  margin: 0 auto 20px auto; /* 이미지와 버튼 사이 간격을 20px로 줄임 */
+  max-width: 240px;
+  width: 100%;
+  height: auto;
+}
+
+#diary-input,
+input[type="text"],
+input[type="email"],
+textarea {
+  border: 1.5px solid #e6e1c3 !important;
+  background: #fafbfc !important;
+}
+
+#diary-input::placeholder,
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+  color: #a6a6a6;
+  font-size: 1.08rem;
+  font-weight: 400;
+  opacity: 1;
+  font-family: Arial, Helvetica, sans-serif;
+}

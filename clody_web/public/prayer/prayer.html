@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clody - Prayer</title>
+    <link rel="stylesheet" href="prayer.css" />
+    <link rel="icon" type="image/png" href="../AppICon.png" />
+    <meta
+      property="og:title"
+      content="Clody - One Journal, One Blessed Reply"
+    />
+    <meta
+      property="og:description"
+      content="Write a gratitude journal and receive a Christian encouragement from Lody"
+    />
+    <meta
+      property="og:image"
+      content="https://clodyweb.web.app/Thumbnail.png"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <img src="../logo.svg" alt="Clody Logo" class="clody-logo" />
+      <a
+        href="https://carewithclody.oopy.io/"
+        target="_blank"
+        class="early-access-btn"
+        >Get Early Access (50 spots)</a
+      >
+      <form id="diary-form">
+        <textarea
+          id="diary-input"
+          maxlength="200"
+          placeholder="Write one thing you're grateful for today"
+          required
+        ></textarea>
+        <div class="form-footer">
+          <span id="char-count">0/200</span>
+          <div class="button-group">
+            <button
+              type="button"
+              class="retry-btn"
+              id="retry-btn"
+              title="Try Again"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M1 4v6h6"></path>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+            </button>
+            <button type="submit" class="send-btn">Send</button>
+          </div>
+        </div>
+      </form>
+      <div id="result" class="result">
+        <span class="result-placeholder"
+          >Lody will reply here in a moment!</span
+        >
+      </div>
+    </div>
+    <script type="module" src="prayer.js"></script>
+  </body>
+</html>
